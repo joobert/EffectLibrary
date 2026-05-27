@@ -266,7 +266,7 @@ namespace EffectLibrary.EFT2
             //sub section
             if (SubSections.Count > 0)
             {
-                writer.AlignBytes(4);
+                writer.AlignBytes(8);
                 WriteSubSectionOffset(writer);
                 WriteList(SubSections, writer, ptclFile);
             }
@@ -282,7 +282,7 @@ namespace EffectLibrary.EFT2
 
             if (Children.Count > 0)
             {
-                writer.AlignBytes(4);
+                writer.AlignBytes(8);
 
                 WriteChildOffset(writer);
                 WriteList(Children, writer, ptclFile);
