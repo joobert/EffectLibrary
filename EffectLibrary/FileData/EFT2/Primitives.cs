@@ -234,13 +234,13 @@ namespace EffectLibrary.EFT2
         {
             base.Read(reader, ptclFile);
 
-            if (this.Header.ChildrenCount != 1)
-                throw new Exception();
-
             //Descriptor
-            SeekFromHeader(reader, this.Header.ChildrenOffset);
-            PrimDescTable = new PrimitiveDescTable();
-            PrimDescTable.Read(reader, ptclFile);
+            if (this.Header.ChildrenCount >= 1 && this.Header.ChildrenOffset != uint.MaxValue)
+            {
+                SeekFromHeader(reader, this.Header.ChildrenOffset);
+                PrimDescTable = new PrimitiveDescTable();
+                PrimDescTable.Read(reader, ptclFile);
+            }
 
             //section contains BFRES
             if (this.Header.BinaryOffset != uint.MaxValue)
@@ -252,7 +252,11 @@ namespace EffectLibrary.EFT2
 
         public override void Write(BinaryWriter writer, PtclFile ptclFile)
         {
-           // SaveBinary();
+            if (ResFile != null)
+                SaveBinary();
+
+            if (BinaryData == null)
+                BinaryData = Array.Empty<byte>();
 
             this.Header.Size = (uint)BinaryData.Length;
 
