@@ -1,4 +1,5 @@
 ﻿using EffectLibrary;
+using EffectLibrary.EFT2;
 using EffectLibrary.Tools;
 using System.IO;
 using System.Text;
@@ -11,9 +12,9 @@ namespace EffectConverter
         {
             if (args.Length == 0)
             {
-                Console.WriteLine($"Tool by KillzXGaming");
-                Console.WriteLine($"To use, drag/drop a ptcl or eff file on exe to dump the contents");
-                Console.WriteLine($"Drag/drop the folder to create a new ptcl");
+                Console.WriteLine($"Tool by KillzXGaming & joobert");
+                Console.WriteLine($"To use, drag/drop a .ptcl or .eff file on the .exe to dump the contents");
+                Console.WriteLine($"Drag/drop the folder to create a new .ptcl");
                 Console.WriteLine($"Dumped files can be swapped and edited");
                 Console.ReadLine();
                 return;
@@ -38,7 +39,11 @@ namespace EffectConverter
             if (magic == "EFFN") //namco effect
             {
                 NamcoEffectFile namcoEffect = new NamcoEffectFile(path);
-                PtclFileDumper.DumpAll(namcoEffect.PtclFile, name);
+                //Some EFFN files have no embedded PtclFile (header-only effect references)
+                if (namcoEffect.PtclFile != null)
+                    PtclFileDumper.DumpAll(namcoEffect.PtclFile, name);
+                else if (!Directory.Exists(name))
+                    Directory.CreateDirectory(name);
                 //Dump namco effect header info which includes emitter link data
                 namcoEffect.Export(Path.Combine(name, $"NamcoFile.json"));
             }
