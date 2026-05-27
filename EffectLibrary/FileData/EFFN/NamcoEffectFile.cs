@@ -91,12 +91,20 @@ namespace EffectLibrary
             for (int i = 0; i < FileHeader.Multi_Part_Effects; i++)
                 this.ExternalBoneNames.Add(reader.ReadUtf8Z());
 
-            var align = GetRequiredChunkAlign();
+            // PtclFile starts at Header_Chunk_Align * 0x1000 bytes from the beginning of the file
+            // Do not recompute from string sizes, use the stored value so we land at the right position, even when our size calculation disagrees with how Nintendo wrote the file
+            int ptclOffset = FileHeader.Header_Chunk_Align > 0
+                ? (int)FileHeader.Header_Chunk_Align * 0x1000
+                : GetRequiredChunkAlign();
 
-            reader.AlignBytes(align);
-
-            var subStream = new SubStream(reader.BaseStream, reader.BaseStream.Position);
-            PtclFile = new PtclFile(subStream);
+            // Some EFFN files have no embedded PtclFile
+            // Guard against seeking past the end of the file to avoid a negative SubStream length
+            if (ptclOffset < reader.BaseStream.Length)
+            {
+                reader.BaseStream.Seek(ptclOffset, SeekOrigin.Begin);
+                var subStream = new SubStream(reader.BaseStream, reader.BaseStream.Position);
+                PtclFile = new PtclFile(subStream);
+            }
         }
 
         private void Write(Stream stream)
