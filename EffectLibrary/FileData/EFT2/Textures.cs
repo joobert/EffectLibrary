@@ -42,7 +42,7 @@ namespace EffectLibrary.EFT2
 
         public override void Write(BinaryWriter writer, PtclFile ptclFile)
         {
-          /*  if (BntxFile != null)
+            if (BntxFile != null)
             {
                 OrderTextures();
 
@@ -51,7 +51,7 @@ namespace EffectLibrary.EFT2
                 this.BinaryData = mem.ToArray();
 
                 this.Header.Size = (uint)BinaryData.Length;
-            }*/
+            }
 
             //Descriptor
             this.Header.ChildrenOffset = 32; //descriptors as children
