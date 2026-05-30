@@ -23,16 +23,17 @@ namespace EffectLibrary.Tools
             HeaderInfo header = new HeaderInfo() { Header = ptcl.Header, Name = ptcl.Name, };
             File.WriteAllText(Path.Combine(folder, "PtclHeader.txt"), JsonConvert.SerializeObject(header, Formatting.Indented));
 
-            foreach (var emitterSet in ptcl.EmitterList.EmitterSets)
-            {
-                DumpEmitterSet(emitterSet, folder);
-            }
-
+            // Write the full effect list before creating any P_* dirs so wrappers can monitor progress immediately
             EmitterSetInfo info = new EmitterSetInfo();
             foreach (var emitterSet in ptcl.EmitterList.EmitterSets)
                 info.Order.Add(emitterSet.Name);
 
             File.WriteAllText(Path.Combine(folder, "EmitterSetInfo.txt"), JsonConvert.SerializeObject(info, Formatting.Indented));
+
+            foreach (var emitterSet in ptcl.EmitterList.EmitterSets)
+            {
+                DumpEmitterSet(emitterSet, folder);
+            }
         }
 
         public static void DumpEmitterSet(EmitterSet emitterSet, string folder)
@@ -74,7 +75,7 @@ namespace EffectLibrary.Tools
             if (shader_user1 != null) shader_user1.Export(Path.Combine(dir, $"UserShader1.bnsh"));
             if (shader_user2 != null) shader_user2.Export(Path.Combine(dir, $"UserShader2.bnsh"));
 
-            void DumpModel(string filePath)
+            void DumpModel(string filePath, Model m)
             {
                 ResFile resFile = new ResFile()
                 {
@@ -82,19 +83,19 @@ namespace EffectLibrary.Tools
                     VersionMajor = 0, VersionMajor2 = 5,
                     VersionMinor = 0, VersionMinor2 = 3,
                     Alignment = 0xC,
-                    Name = model.Name,
+                    Name = m.Name,
                     ByteOrder = Syroot.BinaryData.ByteOrder.LittleEndian,
                 };
-                resFile.Models.Add(model.Name, model);
+                resFile.Models.Add(m.Name, m);
                 resFile.Save(filePath);
             }
 
             if (model != null)
-                DumpModel(Path.Combine(dir, $"{emitter.Data.ParticleData.PrimitiveID}.bfres"));
+                DumpModel(Path.Combine(dir, $"{emitter.Data.ParticleData.PrimitiveID}.bfres"), model);
             if (model_volume != null)
-                DumpModel(Path.Combine(dir, $"{emitter.Data.ShapeInfo.PrimitiveIndex}.bfres"));
+                DumpModel(Path.Combine(dir, $"{emitter.Data.ShapeInfo.PrimitiveIndex}.bfres"), model_volume);
             if (model_extra != null)
-                DumpModel(Path.Combine(dir, $"{emitter.Data.ParticleData.PrimitiveExID}.bfres"));
+                DumpModel(Path.Combine(dir, $"{emitter.Data.ParticleData.PrimitiveExID}.bfres"), model_extra);
 
             void DumpTexures(string filePath, Texture tex)
             {
